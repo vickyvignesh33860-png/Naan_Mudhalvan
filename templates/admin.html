@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduGenie - Admin Database Portal</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    body {
+      background: #f1f5f9;
+    }
+    .admin-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem 3rem;
+    }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      background: #ffffff;
+      padding: 1.25rem 2rem;
+      border-radius: var(--radius-card);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+    .admin-title h1 {
+      font-size: 1.6rem;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .admin-title p {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+    .admin-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+    .btn-secondary {
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-pill);
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+    }
+    .btn-danger {
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-pill);
+      border: none;
+      background: #ef4444;
+      color: #ffffff;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .stat-card .label {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+    .stat-card .value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-top: 0.25rem;
+    }
+
+    /* Panels */
+    .admin-panel {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.2rem;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 0.75rem;
+    }
+    .panel-header h2 {
+      font-size: 1.2rem;
+      color: #0f172a;
+    }
+
+    /* Filters */
+    .filter-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .filter-bar select, .filter-bar input {
+      padding: 0.5rem 0.9rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.88rem;
+    }
+
+    /* Data Table */
+    .table-responsive {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+    th {
+      background: #f8fafc;
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+      color: #475569;
+      border-bottom: 2px solid #e2e8f0;
+      white-space: nowrap;
+    }
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: top;
+    }
+    tr:hover {
+      background: #fbfcfe;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .badge-qa { background: #e0e7ff; color: #3730a3; }
+    .badge-explain { background: #fef3c7; color: #92400e; }
+    .badge-summarize { background: #dcfce7; color: #166534; }
+    .badge-quiz { background: #fce7f3; color: #9d174d; }
+    .badge-learning_path { background: #e0f2fe; color: #075985; }
+
+    /* Auth Screen */
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .auth-card {
+      background: #ffffff;
+      padding: 2.2rem;
+      border-radius: 16px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+    .auth-card h3 {
+      font-size: 1.4rem;
+      margin-bottom: 0.5rem;
+      color: #0f172a;
+    }
+    .auth-card p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+    .auth-card input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+    .auth-error {
+      color: #ef4444;
+      font-size: 0.85rem;
+      margin-bottom: 0.75rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Admin Authentication Modal -->
+  <div id="authOverlay" class="auth-overlay">
+    <div class="auth-card">
+      <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">🔒</div>
+      <h3>EduGenie Admin Portal</h3>
+      <p>Enter the administrator password to access the database records and analytics.</p>
+      <div id="authError" class="auth-error">Incorrect password. Please try again.</div>
+      <form id="adminLoginForm">
+        <input type="password" id="adminPasswordInput" placeholder="Enter Admin Password (default: admin123)" required autofocus>
+        <button type="submit" class="btn-primary" style="width: 100%;">Unlock Database</button>
+      </form>
+      <div style="margin-top: 1rem;">
+        <a href="/" class="btn-secondary" style="justify-content: center; width: 100%;">Return to Student Web</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard Container -->
+  <div id="adminContent" class="admin-container" style="display: none;">
+    <!-- Top Header -->
+    <div class="admin-header">
+      <div class="admin-title">
+        <h1>📊 EduGenie Admin Database Web</h1>
+        <p>Real-time SQLite database visibility and usage analytics</p>
+      </div>
+      <div class="admin-actions">
+        <button class="btn-secondary" onclick="loadDashboardData()">🔄 Refresh</button>
+        <button class="btn-danger" onclick="confirmClearLogs()">🗑️ Clear Database</button>
+        <a href="/" class="btn-secondary">← Student Web</a>
+      </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="label">Total Queries</div>
+        <div class="value" id="statTotalQueries">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Quizzes Evaluated</div>
+        <div class="value" id="statQuizzes">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Average Quiz Score</div>
+        <div class="value" id="statAvgScore">0%</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Database Size</div>
+        <div class="value" id="statDbSize">0 KB</div>
+      </div>
+    </div>
+
+    <!-- Configuration Panel -->
+    <div class="admin-panel">
+      <div class="panel-header">
+        <h2>⚙️ Google Gemini API Key Configuration</h2>
+        <span id="apiKeyBadge" class="badge" style="background: #e0f2fe; color: #0284c7;">Checking...</span>
+      </div>
+      <p style="font-size: 0.88rem; color: #64748b; margin-bottom: 1rem;">
+        Update your Google Gemini API Key dynamically without restarting the server.
+      </p>
+      <div class="input-group">
+        <input type="password" id="newApiKeyInput" placeholder="Enter new Gemini API key (AIzaSy...)">
+        <button class="btn-primary" onclick="updateApiKey()">Save API Key</button>
+      </div>
+      <div id="apiKeyNotice" style="margin-top: 0.5rem; font-size: 0.85rem; font-weight: 600;"></div>
+    </div>
+
+    <!-- Live Database Records Panel -->
+    <div class="admin-panel">
+      <div class="panel-header">
+        <h2>🗄️ Database Records (`interactions` table)</h2>
+        <span style="font-size: 0.85rem; color: #64748b;">Exclusive to Admin Web</span>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-bar">
+        <select id="moduleFilter" onchange="filterInteractions()">
+          <option value="all">All Modules</option>
+          <option value="qna">Q&A Module (/qa)</option>
+          <option value="explain">Explanation Module (/explain)</option>
+          <option value="summarize">Summarization Module (/summarize)</option>
+          <option value="quiz">Quiz Generation (/quiz)</option>
+          <option value="learning_path">Learning Recommendations</option>
+        </select>
+        <input type="text" id="searchFilter" placeholder="Search prompt or response..." onkeyup="filterInteractions()">
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Module</th>
+              <th>Input Query</th>
+              <th>AI Response Preview</th>
+              <th>Model Engine</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody id="interactionsTableBody">
+            <tr>
+              <td colspan="6" style="text-align: center; color: #94a3b8; padding: 2rem;">Loading database records...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Quiz History Panel -->
+    <div class="admin-panel">
+      <div class="panel-header">
+        <h2>🎯 Quiz Performance Log (`quiz_scores` table)</h2>
+      </div>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Topic</th>
+              <th>Score</th>
+              <th>Percentage</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody id="quizScoresTableBody">
+            <tr>
+              <td colspan="5" style="text-align: center; color: #94a3b8; padding: 1.5rem;">No quiz attempts logged yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let adminToken = sessionStorage.getItem("edugenie_admin_token");
+    let allInteractions = [];
+
+    // Check token on load
+    if (adminToken) {
+      document.getElementById("authOverlay").style.display = "none";
+      document.getElementById("adminContent").style.display = "block";
+      loadDashboardData();
+    }
+
+    // Login Form
+    document.getElementById("adminLoginForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const password = document.getElementById("adminPasswordInput").value;
+      const errorDiv = document.getElementById("authError");
+      errorDiv.style.display = "none";
+
+      try {
+        const res = await fetch("/api/admin/auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: password })
+        });
+        const data = await res.json();
+        if (res.ok && data.authenticated) {
+          adminToken = data.token;
+          sessionStorage.setItem("edugenie_admin_token", adminToken);
+          document.getElementById("authOverlay").style.display = "none";
+          document.getElementById("adminContent").style.display = "block";
+          loadDashboardData();
+        } else {
+          errorDiv.style.display = "block";
+        }
+      } catch (err) {
+        errorDiv.innerText = "Error connecting to server.";
+        errorDiv.style.display = "block";
+      }
+    });
+
+    // Load Dashboard Stats and Records
+    async function loadDashboardData() {
+      if (!adminToken) return;
+
+      try {
+        // 1. Fetch Stats
+        const statsRes = await fetch("/api/admin/stats", {
+          headers: { "Authorization": `Bearer ${adminToken}` }
+        });
+        if (statsRes.status === 401) {
+          sessionStorage.removeItem("edugenie_admin_token");
+          location.reload();
+          return;
+        }
+        const stats = await statsRes.json();
+        document.getElementById("statTotalQueries").innerText = stats.total_interactions || 0;
+        document.getElementById("statQuizzes").innerText = stats.total_quizzes_taken || 0;
+        document.getElementById("statAvgScore").innerText = (stats.avg_quiz_score || 0) + "%";
+        document.getElementById("statDbSize").innerText = (stats.db_size_kb || 0) + " KB";
+
+        // Status badge
+        const badge = document.getElementById("apiKeyBadge");
+        if (stats.api_configured) {
+          badge.style.background = "#dcfce7";
+          badge.style.color = "#166534";
+          badge.innerText = "Active & Configured";
+        } else {
+          badge.style.background = "#fee2e2";
+          badge.style.color = "#991b1b";
+          badge.innerText = "Missing / Needs Setup";
+        }
+
+        // Quiz Scores Table
+        const quizTable = document.getElementById("quizScoresTableBody");
+        if (stats.quiz_scores && stats.quiz_scores.length > 0) {
+          quizTable.innerHTML = stats.quiz_scores.map(q => {
+            const pct = Math.round((q.score / (q.total || 1)) * 100);
+            return `
+              <tr>
+                <td>#${q.id}</td>
+                <td><strong>${escapeHtml(q.topic)}</strong></td>
+                <td>${q.score} / ${q.total}</td>
+                <td><span class="badge ${pct >= 60 ? 'badge-summarize' : 'badge-explain'}">${pct}%</span></td>
+                <td>${q.timestamp}</td>
+              </tr>
+            `;
+          }).join("");
+        } else {
+          quizTable.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 1.5rem;">No quiz attempts logged yet.</td></tr>`;
+        }
+
+        // 2. Fetch Interactions
+        const interRes = await fetch("/api/admin/interactions", {
+          headers: { "Authorization": `Bearer ${adminToken}` }
+        });
+        const interData = await interRes.json();
+        allInteractions = interData.interactions || [];
+        renderInteractions(allInteractions);
+
+      } catch (err) {
+        console.error("Dashboard load error:", err);
+      }
+    }
+
+    function renderInteractions(items) {
+      const tbody = document.getElementById("interactionsTableBody");
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 2rem;">No interactions in database yet. Try using EduGenie!</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = items.map(row => {
+        const badgeClass = `badge-${row.module || 'qa'}`;
+        const preview = (row.output_text && row.output_text.length > 140)
+          ? row.output_text.substring(0, 140) + "..."
+          : row.output_text;
+
+        return `
+          <tr>
+            <td><strong>#${row.id}</strong></td>
+            <td><span class="badge ${badgeClass}">${escapeHtml(row.module)}</span></td>
+            <td style="max-width: 220px; font-weight: 500;">${escapeHtml(row.input_text)}</td>
+            <td style="max-width: 320px; font-size: 0.84rem; color: #334155;">${escapeHtml(preview)}</td>
+            <td><span style="font-size: 0.8rem; color: #64748b;">${escapeHtml(row.model_used || 'Gemini 1.5 Pro')}</span></td>
+            <td style="font-size: 0.8rem; color: #94a3b8; white-space: nowrap;">${row.timestamp}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function filterInteractions() {
+      const mod = document.getElementById("moduleFilter").value;
+      const q = document.getElementById("searchFilter").value.toLowerCase().trim();
+
+      const filtered = allInteractions.filter(item => {
+        const matchMod = (mod === "all" || item.module === mod);
+        const matchQ = !q ||
+          (item.input_text && item.input_text.toLowerCase().includes(q)) ||
+          (item.output_text && item.output_text.toLowerCase().includes(q));
+        return matchMod && matchQ;
+      });
+
+      renderInteractions(filtered);
+    }
+
+    async function updateApiKey() {
+      const key = document.getElementById("newApiKeyInput").value.trim();
+      const notice = document.getElementById("apiKeyNotice");
+      if (!key) {
+        notice.style.color = "#dc2626";
+        notice.innerText = "Please enter a valid API key.";
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/admin/set-api-key", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${adminToken}`
+          },
+          body: JSON.stringify({ api_key: key })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          notice.style.color = "#16a34a";
+          notice.innerText = "✅ API key updated and saved successfully!";
+          document.getElementById("newApiKeyInput").value = "";
+          loadDashboardData();
+        } else {
+          notice.style.color = "#dc2626";
+          notice.innerText = data.error || "Failed to update key.";
+        }
+      } catch (err) {
+        notice.style.color = "#dc2626";
+        notice.innerText = "Error: " + err.message;
+      }
+    }
+
+    async function confirmClearLogs() {
+      if (!confirm("Are you sure you want to clear all database interactions and quiz records? This action cannot be undone.")) {
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/admin/clear-logs", {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${adminToken}` }
+        });
+        if (res.ok) {
+          alert("Database records cleared successfully.");
+          loadDashboardData();
+        }
+      } catch (err) {
+        alert("Error clearing logs: " + err.message);
+      }
+    }
+
+    function escapeHtml(text) {
+      if (!text) return "";
+      const div = document.createElement("div");
+      div.innerText = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>
